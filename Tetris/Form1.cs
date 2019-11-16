@@ -23,7 +23,6 @@ namespace Tetris
             pictureBox1.Size = new Size(500,1000);
             label1.Location = new Point(210, 20);
             this.Size = pictureBox1.Size;
-
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -40,11 +39,11 @@ namespace Tetris
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             tetrisGame.Draw(e.Graphics);
-            label1.Text = "Очки: \n" + tetrisGame.getScore();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            label1.Text = "Очки: \n" + tetrisGame.getScore();
             tetrisGame.Update();
             pictureBox1.Refresh();
         }
