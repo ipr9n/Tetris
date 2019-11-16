@@ -18,7 +18,7 @@ namespace Tetris
         public Form1()
         {
             InitializeComponent();
-            timer1.Interval = 120;
+            timer1.Interval = 250;
             pictureBox1.Location = new Point(1,1);
             pictureBox1.Size = new Size(500,1000);
             label1.Location = new Point(210, 20);
@@ -31,7 +31,10 @@ namespace Tetris
             tetrisGame.MoveBlock(e.KeyCode);
 
             if (!timer1.Enabled)
+            {
                 timer1.Start();
+                tetrisGame.GetShape();
+            }
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)

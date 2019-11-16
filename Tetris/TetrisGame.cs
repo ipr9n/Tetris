@@ -12,10 +12,13 @@ namespace Tetris
 {
     class TetrisGame
     {
+        public int offsetBox1x, offsetBox1y, offsetBox2x, offsetBox2y, offsetBox3x, offsetBox3y;
+        private new Random random = new Random();
         private int squareSize = 20;
         private int score = 0;
+        private int shapes = 0;
         int[,] zanjato = new int[10, 20];
-        private int newBoxPositionX = 5, newBoxPositionY = 0;
+        private int newBoxPositionX = 5, newBoxPositionY = 1;
         private Point boxLocation;
 
         public void MoveBlock(Keys direction)
@@ -23,19 +26,48 @@ namespace Tetris
             switch (direction)
             {
                 case Keys.Left:
-                    if (newBoxPositionX > 0)
+                    if (newBoxPositionX > 0 || newBoxPositionX + offsetBox1x > 0 || newBoxPositionX + offsetBox2x > 0 || newBoxPositionX + offsetBox3x > 0)
                         newBoxPositionX -= 1;
                     break;
                 case Keys.Right:
-                    if (newBoxPositionX < 9)
+                    if (newBoxPositionX < 9 || newBoxPositionX + offsetBox1x < 9 || newBoxPositionX + offsetBox2x < 9 || newBoxPositionX + offsetBox3x < 9)
                         newBoxPositionX += 1;
                     break;
             }
         }
 
-        public int getScore()
+        public void Update()
         {
-            return score;
+            if (newBoxPositionY > 18 || newBoxPositionY + offsetBox1y > 18 || newBoxPositionY + offsetBox2y > 18 || newBoxPositionY + offsetBox3y > 18)
+            {
+                zanjato[newBoxPositionX, newBoxPositionY] = 1;
+                zanjato[newBoxPositionX + offsetBox1x, newBoxPositionY + offsetBox1y] = 1;
+                zanjato[newBoxPositionX + offsetBox2x, newBoxPositionY + offsetBox2y] = 1;
+                zanjato[newBoxPositionX + offsetBox3x, newBoxPositionY + offsetBox3y] = 1;
+                newBoxPositionX = 5;
+                newBoxPositionY = 1;
+                boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+                GetShape();
+                checkLine();
+            }
+
+            if (zanjato[newBoxPositionX, newBoxPositionY + 1] == 1 ||
+                zanjato[newBoxPositionX + offsetBox1x, newBoxPositionY + 1 + offsetBox1y] == 1 ||
+                zanjato[newBoxPositionX + offsetBox2x, newBoxPositionY + 1 + offsetBox2y] == 1 ||
+                zanjato[newBoxPositionX + offsetBox3x, newBoxPositionY + 1 + offsetBox3y] == 1)
+            {
+                zanjato[newBoxPositionX, newBoxPositionY] = 1;
+                zanjato[newBoxPositionX + offsetBox1x, newBoxPositionY + offsetBox1y] = 1;
+                zanjato[newBoxPositionX + offsetBox2x, newBoxPositionY + offsetBox2y] = 1;
+                zanjato[newBoxPositionX + offsetBox3x, newBoxPositionY + offsetBox3y] = 1;
+                newBoxPositionX = 5;
+                newBoxPositionY = 1;
+                boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+                GetShape();
+                checkLine();
+            }
+            newBoxPositionY += 1;
+            boxLocation = new Point(newBoxPositionX, newBoxPositionY);
         }
 
         private void checkLine()
@@ -81,26 +113,6 @@ namespace Tetris
             }
         }
 
-        public void Update()
-        {
-            if (newBoxPositionY > 18)
-            {
-                zanjato[newBoxPositionX, newBoxPositionY] = 1;
-                newBoxPositionX = 5;
-                newBoxPositionY = 1;
-                checkLine();
-            }
-
-            if (zanjato[newBoxPositionX, newBoxPositionY + 1] == 1)
-            {
-                zanjato[newBoxPositionX, newBoxPositionY] = 1;
-                checkLine();
-            }
-
-            newBoxPositionY += 1;
-            boxLocation = new Point(newBoxPositionX, newBoxPositionY);
-        }
-
         public void Draw(Graphics graphics)
         {
             for (int x = 0; x <= 10; x++)
@@ -115,6 +127,66 @@ namespace Tetris
                     y * squareSize, squareSize - 1, squareSize - 1);
 
             graphics.FillRectangle(Brushes.Blue, boxLocation.X * squareSize, boxLocation.Y * squareSize, squareSize - 1, squareSize - 1);
+            graphics.FillRectangle(Brushes.Blue, (boxLocation.X + offsetBox1x) * squareSize, (boxLocation.Y + offsetBox1y) * squareSize, squareSize - 1, squareSize - 1);
+            graphics.FillRectangle(Brushes.Blue, (boxLocation.X + offsetBox2x) * squareSize, (boxLocation.Y + offsetBox2y) * squareSize, squareSize - 1, squareSize - 1);
+            graphics.FillRectangle(Brushes.Blue, (boxLocation.X + offsetBox3x) * squareSize, (boxLocation.Y + offsetBox3y) * squareSize, squareSize - 1, squareSize - 1);
         }
+
+        public int getScore()
+        {
+            return score;
+        }
+
+        public void GetShape()
+        {
+            boxLocation = new Point(5, 0);
+            shapes = random.Next(5);
+
+            switch (shapes)
+            {
+                case 0:
+
+                    offsetBox1x = 1;
+                    offsetBox1y = 0;
+                    offsetBox2x = 1;
+                    offsetBox2y = 1;
+                    offsetBox3x = 0;
+                    offsetBox3y = 1;
+                    break;
+                case 1:
+                    offsetBox1x = 0;
+                    offsetBox1y = -1;
+                    offsetBox2x = 0;
+                    offsetBox2y = 1;
+                    offsetBox3x = -1;
+                    offsetBox3y = 1;
+                    break;
+                case 2:
+                    offsetBox1x = 0;
+                    offsetBox1y = -1;
+                    offsetBox2x = 0;
+                    offsetBox2y = 1;
+                    offsetBox3x = 1;
+                    offsetBox3y = 1;
+                    break;
+                case 3:
+                    offsetBox1x = -1;
+                    offsetBox1y = 0;
+                    offsetBox2x = 0;
+                    offsetBox2y = -1;
+                    offsetBox3x = 1;
+                    offsetBox3y = -1;
+                    break;
+                case 4:
+                    offsetBox1x = -1;
+                    offsetBox1y = -1;
+                    offsetBox2x = 0;
+                    offsetBox2y = -1;
+                    offsetBox3x = 1;
+                    offsetBox3y = 0;
+                    break;
+            }
+        }
+
     }
 }
