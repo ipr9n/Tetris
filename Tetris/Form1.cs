@@ -18,7 +18,7 @@ namespace Tetris
         public Form1()
         {
             InitializeComponent();
-            timer1.Interval = 300;
+            timer1.Interval = 200;
             pictureBox1.Location = new Point(1,1);
             pictureBox1.Size = new Size(500,1000);
             this.Size = pictureBox1.Size;

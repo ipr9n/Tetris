@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -12,8 +13,8 @@ namespace Tetris
     class TetrisGame
     {
         private int squareSize = 20;
-        private List<Point> zanyato = new List<Point>();
-        private int x = 5, y = 1;
+        int[,] zanjato = new int[10, 20];
+        private int newBoxPositionX = 5, newBoxPositionY = 1;
         private Point boxLocation;
 
         public void MoveBlock(Keys direction)
@@ -21,25 +22,45 @@ namespace Tetris
             switch (direction)
             {
                 case Keys.Left:
-                    x -= 1;
+                    if (newBoxPositionX > 0)
+                        newBoxPositionX -= 1;
                     break;
                 case Keys.Right:
-                    x += 1;
+                    if (newBoxPositionX < 9)
+                        newBoxPositionX += 1;
                     break;
 
             }
         }
-
+        private void checkLine()
+        {
+            for (int i = 0; i < 20; i++)
+                for (int x = 0; x < 10; x++)
+                {
+                    if (zanjato[x, i] != 1)
+                        break;
+                    if (x == 10) MessageBox.Show("Sobrana liniya");
+                }
+        }
         public void Update()
         {
-            y += 1;
-            if (zanyato.Contains(boxLocation) || y>19)
+            if (newBoxPositionY > 18)
             {
-                zanyato.Add(new Point(boxLocation.X, boxLocation.Y));
-                x = 5;
-                y = 1;
+                zanjato[newBoxPositionX, newBoxPositionY] = 1;
+                newBoxPositionX = 5;
+                newBoxPositionY = 1;
+                checkLine();
             }
-            boxLocation = new Point(x, y);
+
+            if (zanjato[newBoxPositionX, newBoxPositionY + 1] == 1)
+            {
+                zanjato[newBoxPositionX, newBoxPositionY] = 1;
+                checkLine();
+
+            }
+
+            newBoxPositionY += 1;
+            boxLocation = new Point(newBoxPositionX, newBoxPositionY);
         }
 
         public void Draw(Graphics graphics)
@@ -50,10 +71,19 @@ namespace Tetris
             for (int y = 0; y <= 20; y++)
                 graphics.DrawLine(Pens.Black, 0, y * squareSize, 200, y * squareSize);
 
-            for (int z = 0; z < zanyato.Count; z++)
-                graphics.FillRectangle(Brushes.Blue, zanyato[z].X * squareSize, zanyato[z].Y * squareSize, squareSize, squareSize);
+            for (int x = 0; x < 10; x++)
+                for (int y = 0; y < 20; y++)
+                    if (zanjato[x, y] == 1)
+                    {
+                        graphics.FillRectangle(Brushes.Blue, x * squareSize, y * squareSize, squareSize - 1, squareSize - 1);
+                    }
+                    else
+                    {
+                        graphics.FillRectangle(Brushes.Green, x * squareSize, y * squareSize, squareSize - 1, squareSize - 1);
+                    }
 
-            graphics.FillRectangle(Brushes.Blue, boxLocation.X * squareSize, boxLocation.Y * squareSize, squareSize, squareSize);
+
+            graphics.FillRectangle(Brushes.Blue, boxLocation.X * squareSize, boxLocation.Y * squareSize, squareSize - 1, squareSize - 1);
         }
     }
 }
