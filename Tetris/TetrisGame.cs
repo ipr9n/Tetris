@@ -15,6 +15,7 @@ namespace Tetris
     {
         readonly Point[] shapeBoxesOffsets = new Point[3];
         private readonly Random random = new Random();
+        public event Action Defeat = delegate { };
         private int squareSize = 20;
         private int tetrisWight = 10;
         private int tetrisHeight = 20;
@@ -31,9 +32,7 @@ namespace Tetris
             {
                 case Keys.Left:
                     if (newBoxPositionX > 0 &
-                        shapeBoxesOffsets[0].X > 0 &&
-                        shapeBoxesOffsets[1].X > 0 &&
-                        shapeBoxesOffsets[2].X > 0 &&
+                        shapeBoxesOffsets.All(t => t.X > 0) &&
                         zanjato[shapeBoxesOffsets[0].X - 1, shapeBoxesOffsets[0].Y] == 0 &&
                         zanjato[shapeBoxesOffsets[1].X - 1, shapeBoxesOffsets[1].Y] == 0 &&
                         zanjato[shapeBoxesOffsets[2].X - 1, shapeBoxesOffsets[2].Y] == 0 &&
@@ -48,9 +47,7 @@ namespace Tetris
                     break;
                 case Keys.Right:
                     if (newBoxPositionX < tetrisWight - 1 &&
-                        shapeBoxesOffsets[0].X < tetrisWight - 1 &&
-                        shapeBoxesOffsets[1].X < tetrisWight - 1 &&
-                        shapeBoxesOffsets[2].X < tetrisWight - 1 &&
+                        shapeBoxesOffsets.All(t => t.X < tetrisWight - 1) &&
                         zanjato[shapeBoxesOffsets[0].X + 1, shapeBoxesOffsets[0].Y] == 0 &&
                         zanjato[shapeBoxesOffsets[1].X + 1, shapeBoxesOffsets[1].Y] == 0 &&
                         zanjato[shapeBoxesOffsets[2].X + 1, shapeBoxesOffsets[2].Y] == 0 &&
@@ -62,6 +59,34 @@ namespace Tetris
                         newBoxPositionX += 1;
                     }
 
+                    break;
+                case Keys.Up:
+                    TurnShape();
+                    break;
+                case Keys.Space:
+                    while (newBoxPositionY < tetrisHeight - 2||
+                           shapeBoxesOffsets.All(t => t.Y < tetrisHeight - 2) ||
+                           zanjato[newBoxPositionX, newBoxPositionY + 1] != 1 ||
+                           zanjato[shapeBoxesOffsets[0].X, shapeBoxesOffsets[0].Y + 1] != 1 ||
+                           zanjato[shapeBoxesOffsets[1].X, shapeBoxesOffsets[1].Y + 1] != 1 ||
+                           zanjato[shapeBoxesOffsets[2].X, shapeBoxesOffsets[2].Y + 1] != 1)
+                    {
+                        newBoxPositionY += 1;
+                        shapeBoxesOffsets[0].Y += 1;
+                        shapeBoxesOffsets[1].Y += 1;
+                        shapeBoxesOffsets[2].Y += 1;
+                  //      boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+
+                    }
+                    zanjato[newBoxPositionX, newBoxPositionY] = 1;
+                    zanjato[shapeBoxesOffsets[0].X, shapeBoxesOffsets[0].Y] = 1;
+                    zanjato[shapeBoxesOffsets[1].X, shapeBoxesOffsets[1].Y] = 1;
+                    zanjato[shapeBoxesOffsets[2].X, shapeBoxesOffsets[2].Y] = 1;
+                    newBoxPositionX = 5;
+                    newBoxPositionY = 1;
+                  //  boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+                    GetShape();
+                    CheckLine();
                     break;
             }
         }
@@ -79,9 +104,9 @@ namespace Tetris
                 zanjato[shapeBoxesOffsets[2].X, shapeBoxesOffsets[2].Y] = 1;
                 newBoxPositionX = 5;
                 newBoxPositionY = 1;
-                boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+                // boxLocation = new Point(newBoxPositionX, newBoxPositionY);
                 GetShape();
-                checkLine();
+                CheckLine();
             }
 
             if (zanjato[newBoxPositionX, newBoxPositionY + 1] == 1 ||
@@ -89,27 +114,29 @@ namespace Tetris
                 zanjato[shapeBoxesOffsets[1].X, shapeBoxesOffsets[1].Y + 1] == 1 ||
                 zanjato[shapeBoxesOffsets[2].X, shapeBoxesOffsets[2].Y + 1] == 1)
             {
+                if (shapeBoxesOffsets.Any(t => t.Y == 1)) Defeat();
                 zanjato[newBoxPositionX, newBoxPositionY] = 1;
                 zanjato[shapeBoxesOffsets[0].X, shapeBoxesOffsets[0].Y] = 1;
                 zanjato[shapeBoxesOffsets[1].X, shapeBoxesOffsets[1].Y] = 1;
                 zanjato[shapeBoxesOffsets[2].X, shapeBoxesOffsets[2].Y] = 1;
                 newBoxPositionX = 5;
                 newBoxPositionY = 1;
-                boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+              //  boxLocation = new Point(newBoxPositionX, newBoxPositionY);
                 GetShape();
-                checkLine();
+                CheckLine();
             }
 
             newBoxPositionY += 1;
             shapeBoxesOffsets[0].Y += 1;
             shapeBoxesOffsets[1].Y += 1;
             shapeBoxesOffsets[2].Y += 1;
-            boxLocation = new Point(newBoxPositionX, newBoxPositionY);
+          //  boxLocation = new Point(newBoxPositionX, newBoxPositionY);
         }
 
-        private void checkLine()
+        private void CheckLine()
         {
             int countLine = 0;
+
             for (int i = 0; i < tetrisHeight; i++)
                 for (int x = 0; x < tetrisWight; x++)
                 {
@@ -163,7 +190,7 @@ namespace Tetris
                     graphics.FillRectangle(zanjato[x, y] == 1 ? Brushes.Blue : Brushes.Green, x * squareSize,
                     y * squareSize, squareSize - 1, squareSize - 1);
 
-            graphics.FillRectangle(Brushes.Blue, boxLocation.X * squareSize, boxLocation.Y * squareSize, squareSize - 1, squareSize - 1);
+            graphics.FillRectangle(Brushes.Blue, newBoxPositionX * squareSize, newBoxPositionY * squareSize, squareSize - 1, squareSize - 1);
             graphics.FillRectangle(Brushes.Blue, shapeBoxesOffsets[0].X * squareSize, shapeBoxesOffsets[0].Y * squareSize, squareSize - 1, squareSize - 1);
             graphics.FillRectangle(Brushes.Blue, shapeBoxesOffsets[1].X * squareSize, shapeBoxesOffsets[1].Y * squareSize, squareSize - 1, squareSize - 1);
             graphics.FillRectangle(Brushes.Blue, shapeBoxesOffsets[2].X * squareSize, shapeBoxesOffsets[2].Y * squareSize, squareSize - 1, squareSize - 1);
@@ -174,9 +201,64 @@ namespace Tetris
             return score;
         }
 
+        public void TurnShape()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                if (shapeBoxesOffsets[i].X == newBoxPositionX + 1 && shapeBoxesOffsets[i].Y == newBoxPositionY)
+                {
+                    shapeBoxesOffsets[i].X = newBoxPositionX;
+                    shapeBoxesOffsets[i].Y = newBoxPositionY + 1;
+                }
+
+                else if (shapeBoxesOffsets[i].X == newBoxPositionX && shapeBoxesOffsets[i].Y == newBoxPositionY + 1)
+                {
+                    shapeBoxesOffsets[i].X = newBoxPositionX - 1;
+                    shapeBoxesOffsets[i].Y = newBoxPositionY;
+                }
+
+                else if (shapeBoxesOffsets[i].X == newBoxPositionX + 1 && shapeBoxesOffsets[i].Y == newBoxPositionY + 1)
+                {
+                    shapeBoxesOffsets[i].X = newBoxPositionX - 1;
+                    shapeBoxesOffsets[i].Y = newBoxPositionY + 1;
+                }
+
+                else if (shapeBoxesOffsets[i].X == newBoxPositionX && shapeBoxesOffsets[i].Y == newBoxPositionY - 1)
+                {
+                    shapeBoxesOffsets[i].X = newBoxPositionX + 1;
+                    shapeBoxesOffsets[i].Y = newBoxPositionY;
+                }
+
+                else if (shapeBoxesOffsets[i].X == newBoxPositionX - 1 && shapeBoxesOffsets[i].Y == newBoxPositionY + 1)
+                {
+                    shapeBoxesOffsets[i].X = newBoxPositionX - 1;
+                    shapeBoxesOffsets[i].Y = newBoxPositionY - 1;
+                }
+
+                else if (shapeBoxesOffsets[i].X == newBoxPositionX - 1 && shapeBoxesOffsets[0].Y == newBoxPositionY)
+                {
+                    shapeBoxesOffsets[0].X = newBoxPositionX;
+                    shapeBoxesOffsets[0].Y = newBoxPositionY - 1;
+                }
+
+                else if (shapeBoxesOffsets[0].X == newBoxPositionX + 1 && shapeBoxesOffsets[0].Y == newBoxPositionY - 1)
+                {
+                    shapeBoxesOffsets[0].X = newBoxPositionX + 1;
+                    shapeBoxesOffsets[0].Y = newBoxPositionY + 1;
+                }
+
+                else if (shapeBoxesOffsets[0].X == newBoxPositionX - 1 && shapeBoxesOffsets[0].Y == newBoxPositionY - 1)
+                {
+                    shapeBoxesOffsets[0].X = newBoxPositionX + 1;
+                    shapeBoxesOffsets[0].Y = newBoxPositionY - 1;
+                }
+
+            }
+        }
+
         public void GetShape()
         {
-            boxLocation = new Point(5, 1);
+          ///  boxLocation = new Point(5, 1);
             shapes = random.Next(5);
 
             switch (shapes)
@@ -187,7 +269,7 @@ namespace Tetris
                     shapeBoxesOffsets[0].Y = newBoxPositionY;
                     shapeBoxesOffsets[1].X = newBoxPositionX;
                     shapeBoxesOffsets[1].Y = newBoxPositionY + 1;
-                    shapeBoxesOffsets[2].X = newBoxPositionX;
+                    shapeBoxesOffsets[2].X = newBoxPositionX + 1;
                     shapeBoxesOffsets[2].Y = newBoxPositionY + 1; ;
                     break;
                 case 1:
@@ -223,6 +305,11 @@ namespace Tetris
                     shapeBoxesOffsets[2].Y = newBoxPositionY;
                     break;
             }
+        }
+
+        private void GameOver()
+        {
+
         }
     }
 }

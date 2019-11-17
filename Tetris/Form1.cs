@@ -23,6 +23,7 @@ namespace Tetris
             pictureBox1.Size = new Size(500,1000);
             label1.Location = new Point(210, 20);
             this.Size = pictureBox1.Size;
+            tetrisGame.Defeat += GameOver;
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -36,6 +37,11 @@ namespace Tetris
             }
         }
 
+        public void GameOver()
+        {
+            timer1.Stop();
+            MessageBox.Show("gameover");
+        }
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             tetrisGame.Draw(e.Graphics);
